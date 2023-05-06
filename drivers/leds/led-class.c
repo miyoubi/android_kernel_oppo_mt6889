@@ -233,7 +233,7 @@ static void led_remove_brightness_hw_changed(struct led_classdev *led_cdev)
 extern bool __attribute((weak)) oplus_display_tenbits_support;
 extern bool __attribute((weak)) oplus_display_elevenbits_support;
 extern bool __attribute((weak)) oplus_display_twelvebits_support;
-int get_full_backlight_level()
+int get_full_backlight_level(void)
 {
 	if (oplus_display_twelvebits_support)
 		return 4095;
@@ -244,7 +244,7 @@ int get_full_backlight_level()
 	return 255;
 }
 EXPORT_SYMBOL_GPL(get_full_backlight_level);
-int get_half_backlight_level()
+int get_half_backlight_level(void)
 {
 	if (oplus_display_twelvebits_support)
 		return 2047;

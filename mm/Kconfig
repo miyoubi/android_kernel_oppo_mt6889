@@ -874,9 +874,16 @@ source "mm/damon/Kconfig"
 # multi-gen LRU {
 config LRU_GEN
 	bool "Multi-Gen LRU"
+	# the following options can use up the spare bits in page flags
+	depends on !MAXSMP && (64BIT || !SPARSEMEM || SPARSEMEM_VMEMMAP)
+	help
+	  A high performance LRU implementation to overcommit memory.
 
 config LRU_GEN_ENABLED
-	bool "Disable by default, Need switch by sysfs control"
+	bool "Enable by default"
+	depends on LRU_GEN
+	help
+	  This option enables the multi-gen LRU by default.
 
 config LRU_GEN_STATS
 	bool "Full stats for debugging"

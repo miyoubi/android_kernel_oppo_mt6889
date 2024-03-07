@@ -1461,6 +1461,11 @@ int usb_add_gadget(struct usb_gadget *gadget)
 	if (ret)
 		goto err_del_udc;
 
+	ret = sysfs_create_link(&udc->dev.kobj,
+				&gadget->dev.kobj, "gadget");
+	if (ret)
+		goto err_del_udc;
+
 	mutex_unlock(&udc_lock);
 
 	return 0;
@@ -1604,13 +1609,7 @@ void usb_del_gadget(struct usb_gadget *gadget)
 	mutex_unlock(&udc_lock);
 
 	kobject_uevent(&udc->dev.kobj, KOBJ_REMOVE);
-	/*
-	 * Set the teardown flag before flushing the work to prevent new work
-	 * from being scheduled while we are cleaning up.
-	 */
-	spin_lock_irqsave(&gadget->state_lock, flags);
-	gadget->teardown = true;
-	spin_unlock_irqrestore(&gadget->state_lock, flags);
+	sysfs_remove_link(&udc->dev.kobj, "gadget");
 	flush_work(&gadget->work);
 	device_unregister(&udc->dev);
 	device_del(&gadget->dev);

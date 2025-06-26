@@ -432,6 +432,7 @@ config MTK_MERGE_INTERFACE_SUPPORT
 
 config MTK_CONNFEM
 	tristate "MediaTek connfem driver"
+	default y
 	depends on MTK_COMBO
 	help
 	  This config is used to choose
@@ -469,6 +470,7 @@ config MTK_CONNSYS_DEDICATED_LOG_PATH
 
 config WLAN_DRV_BUILD_IN
 	bool "Build Wlan module in kernel"
+	default y
 	help
 	  This will build the wlan driver and the corresponding componenets
 	  into the kernel.

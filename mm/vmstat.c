@@ -1315,9 +1315,6 @@ const char * const vmstat_text[] = {
 	"swap_ra",
 	"swap_ra_hit",
 #endif
-#ifdef CONFIG_SPECULATIVE_PAGE_FAULT
-	"speculative_pgfault",
-#endif
 #ifdef CONFIG_LOOK_AROUND
 	"skipped_rmap_by_lookaround",
 	"rmap_not_skipped_by_lookaround",

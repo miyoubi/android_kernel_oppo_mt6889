@@ -15,9 +15,6 @@
 #ifdef CONFIG_MAPPED_PROTECT
 extern bool update_mapped_mul(struct page *page, bool inc_size);
 #endif
-extern int isolate_lru_page(struct page *page);
-extern void putback_lru_page(struct page *page);
-extern unsigned long reclaim_pages(struct list_head *page_list);
 
 /*
  * The anon_vma heads a list of private "related" vmas, to scan if

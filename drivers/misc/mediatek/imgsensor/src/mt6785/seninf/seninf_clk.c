@@ -41,6 +41,7 @@ gseninf_clk_freq[SENINF_CLK_IDX_FREQ_IDX_NUM] = {
 
 #ifdef IMGSENSOR_DFS_CTRL_ENABLE
 struct mtk_pm_qos_request imgsensor_qos;
+struct pm_qos_request imgsensor_qos;
 
 int imgsensor_dfs_ctrl(enum DFS_OPTION option, void *pbuff)
 {
@@ -55,6 +56,11 @@ int imgsensor_dfs_ctrl(enum DFS_OPTION option, void *pbuff)
 		break;
 	case DFS_CTRL_DISABLE:
 		mtk_pm_qos_remove_request(&imgsensor_qos);
+		pm_qos_add_request(&imgsensor_qos, PM_QOS_CAM_FREQ, 0);
+		pr_debug("seninf PMQoS turn on\n");
+		break;
+	case DFS_CTRL_DISABLE:
+		pm_qos_remove_request(&imgsensor_qos);
 		pr_debug("seninf PMQoS turn off\n");
 		break;
 	case DFS_UPDATE:
@@ -63,11 +69,14 @@ int imgsensor_dfs_ctrl(enum DFS_OPTION option, void *pbuff)
 			*(unsigned int *)pbuff);
 		mtk_pm_qos_update_request(&imgsensor_qos,
 			*(unsigned int *)pbuff);
+		pm_qos_update_request(&imgsensor_qos, *(unsigned int *)pbuff);
+
 		break;
 	case DFS_RELEASE:
 		pr_debug(
 			"seninf release and set isp clk request to 0\n");
 		mtk_pm_qos_update_request(&imgsensor_qos, 0);
+		pm_qos_update_request(&imgsensor_qos, 0);
 		break;
 	case DFS_SUPPORTED_ISP_CLOCKS:
 	{

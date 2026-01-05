@@ -2152,6 +2152,10 @@ static void msdc_ops_set_ios(struct mmc_host *mmc, struct mmc_ios *ios)
 			pinctrl_select_state(host->pinctrl, host->pins_default);
 			mdelay(1);
 		}
+
+		if (host->mclk != ios->clock || host->timing != ios->timing)
+			msdc_set_mclk(host, ios->timing, ios->clock);
+
 		break;
 	case MMC_POWER_ON:
 		if (!IS_ERR(mmc->supply.vqmmc) && !host->vqmmc_enabled) {
@@ -2165,6 +2169,10 @@ static void msdc_ops_set_ios(struct mmc_host *mmc, struct mmc_ios *ios)
 			pinctrl_select_state(host->pinctrl, host->pins_default);
 			mdelay(1);
 		}
+
+		if (host->mclk != ios->clock || host->timing != ios->timing)
+			msdc_set_mclk(host, ios->timing, ios->clock);
+
 		break;
 	case MMC_POWER_OFF:
 		if (!IS_ERR(mmc->supply.vmmc))
@@ -2174,6 +2182,19 @@ static void msdc_ops_set_ios(struct mmc_host *mmc, struct mmc_ios *ios)
 			regulator_disable(mmc->supply.vqmmc);
 			host->vqmmc_enabled = false;
 		}
+
+		if (mmc->host_function == MSDC_SD) {
+			if (host->mclk == 100000) {
+				host->block_bad_card = 1;
+				pr_notice("[%s]: msdc power off at clk %dhz set block_bad_card = %d\n",
+					__func__, host->mclk,
+					host->block_bad_card);
+			}
+		}
+
+		if (host->mclk != ios->clock || host->timing != ios->timing)
+			msdc_set_mclk(host, ios->timing, ios->clock);
+
 		if (host->pins_pull_down) {
 			pinctrl_select_state(host->pinctrl, host->pins_pull_down);
 			mdelay(1);
@@ -2182,9 +2203,6 @@ static void msdc_ops_set_ios(struct mmc_host *mmc, struct mmc_ios *ios)
 	default:
 		break;
 	}
-
-	if (host->mclk != ios->clock || host->timing != ios->timing)
-		msdc_set_mclk(host, ios->timing, ios->clock);
 }
 
 static u32 test_delay_bit(u32 delay, u32 bit)

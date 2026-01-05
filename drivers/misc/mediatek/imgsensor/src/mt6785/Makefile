@@ -30,6 +30,13 @@ obj-y				+= ../common/$(COMMON_VERSION)/imgsensor_legacy.o
 obj-y				+= ../common/$(COMMON_VERSION)/imgsensor_proc.o
 obj-y				+= ../common/$(COMMON_VERSION)/imgsensor_sensor_list.o
 obj-y				+= ../common/$(COMMON_VERSION)/seninf.o
+#ifdef OPLUS_FEATURE_CAMERA_COMMON
+obj-y				+= ../OplusImgsensor/imgsensor_eeprom.o
+obj-y				+= ../OplusImgsensor/imgsensor_hwcfg_custom.o
+obj-y				+= ../OplusImgsensor/imgsensor_hwcfg_mt6785.o
+#endif
+# Oplus platformflag
+subdir-ccflags-y += -DSENSOR_PLATFORM_4G_20682
 define FILTER_DRV
 ifeq ($(wildcard $(IMGSENSOR_DRIVER_PATH)/$(MTK_PLATFORM)/camera_project/$(ARCH_MTK_PROJECT)/$(1)),)
 ifeq ($(wildcard $(IMGSENSOR_DRIVER_PATH)/$(MTK_PLATFORM)/$(1)),)

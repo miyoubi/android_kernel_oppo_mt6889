@@ -906,8 +906,8 @@ gpio_goodix_cs_func: gpio_goodix_cs_func {
 	qcom,vbatt_pdqc_to_5v_thr = <4100>;
 	qcom,vbatt_pdqc_to_9v_thr = <4000>;
 
-	oplus,aging_ffc_version = <1>;
-
+	oplus,full_limit_curr_support;
+	oplus_spec,dec-vol-fv-mv = <40>;
 	//GPIO config:
 	qcom,chargerid_switch-gpio = <&pio 192 0x00>;	//check
 	qcom,ship-gpio = <&pio 126 0x00>;		//check
@@ -1018,6 +1018,7 @@ gpio_goodix_cs_func: gpio_goodix_cs_func {
 		compatible = "oplus,mp2650-charger";
 		reg = <0x5c 0>;
 
+		support_icl_optimization;
 		qcom,mps_otg_en-gpio = <&pio 129 0x00>;		//check
 		pinctrl-names = "mps_otg_en_active", "mps_otg_en_sleep", "mps_otg_en_default";
 		pinctrl-0 = <&mps_otg_en_active>;
@@ -1029,6 +1030,8 @@ gpio_goodix_cs_func: gpio_goodix_cs_func {
 		status = "okay";
 		compatible = "oplus,rk826-fastcg";
 		reg = <0x0a 0>;
+		oplus,vooc_1time_full_volt = <4500>;
+		oplus,vooc_ntime_full_volt = <4490>;
 		qcom,oplus_batt_4400mv;
 		qcom,support_vooc_by_normal_charger_path;
 		qcom,vooc_fw_update_newmethod;
@@ -1399,6 +1402,7 @@ gpio_goodix_cs_func: gpio_goodix_cs_func {
 //#ifdef OPLUS_FEATURE_CHG_BASIC
 /* 2020/09/01, add for mp2762 for svooc */
 &lk_charger{
+	support_chg_time_cnt;
 	charger_by_buckboost;
 	support_tuv_authentication;
 	max_charger_voltage = <9900000>;

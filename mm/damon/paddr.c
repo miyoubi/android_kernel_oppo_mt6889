@@ -237,7 +237,6 @@ static unsigned long damon_pa_apply_scheme(struct damon_ctx *ctx,
 			list_add(&page->lru, &page_list);
 		put_page(page);
 	}
-	applied = reclaim_pages(&page_list);
 	cond_resched();
 	printk("[damon_reclaim] reclaimed %lld pages\n", applied);
 	nr_reclaim_page = nr_reclaim_page + applied;

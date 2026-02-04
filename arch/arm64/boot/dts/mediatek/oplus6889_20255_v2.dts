@@ -2012,5 +2012,5 @@ gpio_goodix_cs_func: gpio_goodix_cs_func {
 //#endif
 
 #include "mediatek/cust_mt6889_camera_20131.dtsi"
-#include <oplus6889_20255_v2/cust.dtsi>
+#include <mediatek/oplus6889_20255_v2/cust.dtsi>
 /*End of this file, DO NOT ADD ANYTHING HERE*/

@@ -941,11 +941,8 @@ OPLUS_WFD_OBJS += oplus_wfd/wlan_oplus_wfd.o
 # ---------------------------------------------------
 SERVICE_DIR  := wlan_service/
 
-ifneq ($(findstring wlan_service,$(MTK_WLAN_SERVICE_PATH)),)
 MTK_WLAN_SERVICE=yes
-SERVICE_DIR  := $(MTK_WLAN_SERVICE_PATH)
 $(info SERVICE_DIR is [{$(MTK_WLAN_SERVICE_PATH)}])
-endif
 
 ifeq ($(MTK_WLAN_SERVICE), yes)
 ccflags-y += -DCONFIG_WLAN_SERVICE=1

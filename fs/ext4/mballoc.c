@@ -5570,8 +5570,7 @@ ext4_trim_group_seq_partial(struct super_block *sb, ext4_group_t group,
 				goto out;
 			}
 
-			ret = ext4_trim_extent(sb, start,
-					       next - start, group, &e4b);
+			ret = ext4_trim_extent(sb, start, next - start, &e4b);
 			if (ret && ret != -EOPNOTSUPP)
 				break;
 			ret = 0;

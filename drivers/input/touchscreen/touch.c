@@ -119,7 +119,7 @@ void primary_display_esd_check_enable(int enable)
 EXPORT_SYMBOL(primary_display_esd_check_enable);
 #endif /*CONFIG_MTK_FB*/
 
-bool __init tp_judge_ic_match(char *tp_ic_name)
+bool tp_judge_ic_match(char *tp_ic_name)
 {
 	int prj_id = 0;
 	pr_err("[TP] tp_ic_name = %s \n", tp_ic_name);

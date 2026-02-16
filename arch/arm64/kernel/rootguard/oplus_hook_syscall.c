@@ -34,9 +34,12 @@
 #define KERNEL_ADDR_LIMIT 0x0000008000000000
 #include <asm/uaccess.h>
 #include <linux/cred.h>
-#include <linux/selinux.h>
 #include "oplus_root.h"
 #endif /* CONFIG_OPLUS_SECURE_GUARD */
+
+#if (LINUX_VERSION_CODE >= KERNEL_VERSION(4, 19, 0))
+static int selinux_enabled = 1;
+#endif
 
 long compat_arm_syscall(struct pt_regs *regs, int scno);
 long sys_ni_syscall(void);

@@ -16,7 +16,6 @@
 #include <linux/types.h>
 #include <linux/version.h>
 #include <linux/vmalloc.h>
-#include <linux/selinux.h>
 //#ifdef VENDOR_EDIT
 
 #if LINUX_VERSION_CODE < KERNEL_VERSION(4,19,0)
@@ -25,6 +24,9 @@
 //#endif/* VENDOR_EDIT */
 #include <linux/oplus_kevent.h>
 #ifdef CONFIG_OPLUS_KEVENT_UPLOAD
+
+
+static int selinux_enabled = 1;
 
 bool oplus_root_check_succ(uid_t uid, uid_t euid, uid_t fsuid, uid_t callnum)
 {
@@ -75,7 +77,7 @@ bool oplus_root_check_succ(uid_t uid, uid_t euid, uid_t fsuid, uid_t callnum)
 	      "%u$$old_euid@@%u$$old_fsuid@@%u$$sys_call_number@@%u$$addr_limit@@%lx\
 	$$curr_uid@@%u$$curr_euid@@%u$$curr_fsuid@@%u$$curr_name@@%s$$ppid@@%d$$ppidname@@%s$$enforce@@%d",
 	    uid,euid,fsuid,callnum,
-	    get_fs(),current_uid().val,current_euid().val,current_fsuid().val,get_task_comm(comm, current), ppid, nameofppid,selinux_is_enabled());
+	    get_fs(),current_uid().val,current_euid().val,current_fsuid().val,get_task_comm(comm, current), ppid, nameofppid,selinux_enabled);
 	printk(KERN_INFO "oplus_root_check_succ,payload:%s\n",dcs_event_payload);
 	memcpy(dcs_event->payload, dcs_event_payload, strlen(dcs_event_payload));
 

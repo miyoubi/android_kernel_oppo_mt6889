@@ -638,7 +638,7 @@ static struct i2c_driver bq25980_master_driver = {
 };
 
 #if (LINUX_VERSION_CODE < KERNEL_VERSION(5, 4, 0))
-int __init bq25980_master_subsys_init(void)
+int bq25980_master_subsys_init(void)
 {
 	int ret = 0;
 	pps_err("init start\n");

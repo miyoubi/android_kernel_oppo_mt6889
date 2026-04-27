@@ -27,7 +27,7 @@ extern void tmemory_close(void);
 #endif
 
 
-static struct super_block *get_f2fs_sb()
+static struct super_block *get_f2fs_sb(void)
 {
 	struct path kpath;
 	struct kstatfs st;
@@ -54,7 +54,7 @@ struct panic_flush_control {
 
 static struct panic_flush_control *pfc;
 
-static void panic_issue_flush()
+static void panic_issue_flush(void)
 {
 	struct super_block *sb = NULL;
 	int ret = -1;

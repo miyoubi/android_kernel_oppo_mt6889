@@ -69,9 +69,6 @@ struct anon_vma {
 	/* Interval tree of private "related" vmas */
 	struct rb_root_cached rb_root;
 
-	/* key to tell if a valid anon_vma type */
-	unsigned long private;
-
 	/*
 	 * ANDROID: KABI preservation, it's safe to put these at the end of this structure as it's
 	 * only passed by a pointer everywhere, the size and internal structures are local to the
@@ -128,7 +125,8 @@ enum ttu_flags {
 					 * do a final flush if necessary */
 	TTU_RMAP_LOCKED		= 0x80,	/* do not grab rmap lock:
 					 * caller holds it */
-	TTU_SPLIT_FREEZE	= 0x100,		/* freeze pte under splitting thp */
+	TTU_SPLIT_FREEZE	= 0x100, /* freeze pte under splitting thp */
+	TTU_SYNC		= 0x200, /* avoid racy checks with PVMW_SYNC */
 };
 
 #ifdef CONFIG_MMU

@@ -1808,10 +1808,8 @@ static int mxt_read_info_block(struct mxt_data *data)
 	error = mxt_parse_object_table(data, id_buf + MXT_OBJECT_START);
 	if (error) {
 		dev_err(&client->dev, "Error %d parsing object table\n", error);
-		/* If info block already allocated, free it */
-		if (data->raw_info_block)
-			mxt_free_object_table(data);
-		goto err_free_mem;
+		mxt_free_object_table(data);
+		return error;
 	}
 
 	data->object_table = (struct mxt_object *)(id_buf + MXT_OBJECT_START);

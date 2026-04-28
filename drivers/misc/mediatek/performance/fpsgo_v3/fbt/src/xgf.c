@@ -77,12 +77,19 @@ module_param(xgf_sp_name_id, int, 0644);
 HLIST_HEAD(xgf_renders);
 HLIST_HEAD(xgf_hw_events);
 
+static int xgf_est_runtime_stub(pid_t r_pid, struct xgf_render *render,
+	unsigned long long *runtime, unsigned long long ts)
+{
+	*runtime = 0;
+	return -ENOENT;
+}
+
 int (*xgf_est_runtime_fp)(
 	pid_t r_pid,
 	struct xgf_render *render,
 	unsigned long long *runtime,
 	unsigned long long ts
-	);
+	) = xgf_est_runtime_stub;
 EXPORT_SYMBOL(xgf_est_runtime_fp);
 
 int (*fpsgo_xgf2ko_calculate_target_fps_fp)(

@@ -12,16 +12,9 @@
 
 static int debug_probe(struct platform_device *pdev)
 {
-	int ret = 0;
-
 	pr_notice("%s in", __func__);
 
 	return 0;
-
-out:
-	pr_notice("debug probe error!!\n");
-
-	return ret;
 }
 
 static struct platform_driver debug_driver = {

@@ -1,4 +1,4 @@
-// SPDX-License-Identifier: GPL-2.0-only
+.// SPDX-License-Identifier: GPL-2.0-only
 /*
  * Copyright (C) 2018-2020 Oplus. All rights reserved.
  */
@@ -503,7 +503,7 @@ static void dump_confidential_status(struct seq_file *s)
     return;
 }
 
-static void update_manifest(struct proc_dir_entry *parent)
+static void __init update_manifest(struct proc_dir_entry *parent)
 {
     static const char* manifest_src[2] = {
         "/vendor/odm/etc/vintf/manifest_ssss.xml",

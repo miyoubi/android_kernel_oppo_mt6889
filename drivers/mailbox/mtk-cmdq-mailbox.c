@@ -1245,7 +1245,7 @@ void cmdq_pkt_poll_gpr_check(
 	struct cmdq *cmdq;
 
 	if (gpr_idx >= CMDQ_GPR_CNT_ID) {
-		cmdq_msg("%s:invalid gpr_idx pkt:%p gpr_idx:%u start:%d",
+		pr_debug("%s:invalid gpr_idx pkt:%p gpr_idx:%u start:%d",
 			__func__, pkt, gpr_idx, start);
 		return;
 	}

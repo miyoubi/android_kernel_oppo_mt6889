@@ -50,7 +50,7 @@ ifneq (,$(wildcard mt6879))
 	PARAMS += mali,mt6879,mali_valhall,mali-r32p1,mali_valhall_r32p1_mt6879
 endif
 ifneq (,$(wildcard mt6893))
-	PARAMS += mali,mt6893,mali_valhall,mali-r32p1,mali_valhall_r32p1_mt6893
+	PARAMS += mali,mt6893,mali_valhall,mali-r38p1,mali_valhall_r32p1_mt6893
 endif
 ifneq (,$(wildcard mt6895))
 	PARAMS += mali,mt6895,mali_valhall,mali-r32p1,mali_valhall_r32p1_mt6895

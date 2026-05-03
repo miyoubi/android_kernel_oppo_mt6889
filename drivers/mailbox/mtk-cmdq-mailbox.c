@@ -1251,14 +1251,14 @@ void cmdq_pkt_poll_gpr_check(
 	}
 
 	if (!pkt->cl) {
-		cmdq_msg("%s:invalid client pkt:%p gpr_idx:%u start:%d",
+		pr_debug("%s:invalid client pkt:%p gpr_idx:%u start:%d",
 			__func__, pkt, gpr_idx, start);
 		return;
 	}
 	client = (struct cmdq_client *)pkt->cl;
 
 	if (!client->chan->con_priv) {
-		cmdq_msg("%s:invalid thread pkt:%p gpr_idx:%u start:%d",
+		pr_debug("%s:invalid thread pkt:%p gpr_idx:%u start:%d",
 			__func__, pkt, gpr_idx, start);
 		return;
 	}
@@ -1267,7 +1267,7 @@ void cmdq_pkt_poll_gpr_check(
 
 	/* check */
 	if (cmdq->gpr[gpr_idx] >= 0 && cmdq->gpr[gpr_idx] != thread->idx) {
-		cmdq_err("pkt:%p gpr_idx:%u start:%d thread:%d:%d not same",
+		pr_debug("pkt:%p gpr_idx:%u start:%d thread:%d:%d not same",
 			pkt, gpr_idx, start, cmdq->gpr[gpr_idx], thread->idx);
 		cmdq_util_aee(
 			cmdq_thread_module_dispatch(cmdq->base_pa, thread->idx),
@@ -1276,7 +1276,7 @@ void cmdq_pkt_poll_gpr_check(
 		return;
 	}
 
-	cmdq_msg("pkt:%p gpr_idx:%u start:%d thread:%d:%d",
+	pr_debug("pkt:%p gpr_idx:%u start:%d thread:%d:%d",
 		pkt, gpr_idx, start, cmdq->gpr[gpr_idx], thread->idx);
 	cmdq->gpr[gpr_idx] = thread->idx;
 

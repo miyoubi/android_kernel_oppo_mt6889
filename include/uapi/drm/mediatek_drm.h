@@ -464,6 +464,7 @@ struct DISP_PQ_PARAM {
 #define DRM_MTK_WRITE_SW_REG   0x2F
 #define DRM_MTK_SUPPORT_SLD 0x56
 #define DRM_MTK_SET_SLD_PARAM 0x57
+#define DRM_MTK_KICK_IDLE 0x5b
 
 /* AAL */
 #define DRM_MTK_AAL_INIT_REG	0x30
@@ -853,6 +854,8 @@ struct mtk_drm_panels_info {
 	DRM_MTK_SUPPORT_SLD, bool)
 #define DRM_IOCTL_MTK_SET_SLD_PARAM    DRM_IOWR(DRM_COMMAND_BASE + \
 	DRM_MTK_SET_SLD_PARAM, struct DISP_SLD_PARAM)
+#define DRM_IOCTL_MTK_KICK_IDLE     DRM_IOWR(DRM_COMMAND_BASE + \
+        DRM_MTK_KICK_IDLE, unsigned int)
 
 /* AAL IOCTL */
 #define AAL_HIST_BIN            33	/* [0..32] */

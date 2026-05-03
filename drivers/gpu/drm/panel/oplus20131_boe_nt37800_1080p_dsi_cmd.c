@@ -1255,7 +1255,7 @@ static int lcm_setbacklight_cmdq(void *dsi, dcs_write_gce cb,
 	pr_err("mapped_level=%d\n", mapped_level);
 
 /* #ifdef OPLUS_BUG_STABILITY */
-	pr_err("boe lcm: debug for display panel backlight value,func:=%s,level :=%d, mapped_level := %d\n", __func__, level, mapped_level);
+	pr_debug("boe lcm: debug for display panel backlight value,func:=%s,level :=%d, mapped_level := %d\n", __func__, level, mapped_level);
 /* #endif */
 	if (level == 1 || mapped_level == 1) {
 		pr_info("enter aod mode, ignore set backlight to 1\n");

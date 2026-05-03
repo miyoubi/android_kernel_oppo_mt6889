@@ -286,7 +286,7 @@ enum mt_cpu_dvfs_id {
 #define B_FREQ_BASE			2300000
 #define B_FREQ26_BASE		2600000
 #define	CCI_FREQ_BASE		1540000
-#define GPU_FREQ_BASE		806000
+#define GPU_FREQ_BASE		861000
 #define B_M_FREQ_BASE		1750000
 #define GPU_M_FREQ_BASE		620000
 
@@ -330,6 +330,7 @@ enum mt_cpu_dvfs_id {
 #define VBOOT_PMIC_VAL	(75000)
 #define VBOOT_PMIC_CLR	(0)
 #define VBOOT_VAL		(0x38) /* volt domain: 0.75v */
+#define VBOOT_VAL_GPU		(0x3C) /* volt domain: 0.775v for 861MHz OC */
 #define VMAX_VAL		(0x60) /* volt domain: 1v*/
 #define VMIN_VAL		(0x20) /* volt domain: 0.6v*/
 #define VMIN_VAL_D4		(0x28) /* volt domain: 0.65v*/

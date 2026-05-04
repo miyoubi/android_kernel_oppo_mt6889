@@ -1124,3 +1124,72 @@ static int kbasep_vinstr_hwcnt_reader_release(struct inode *inode,
 
 	return 0;
 }
+
+/* MTK vinstr power model integration */
+int mtk_pm_tool = pm_non;
+int ds5_used = 1;
+static struct kbase_vinstr_client *mtk_cli;
+
+void MTK_update_mtk_pm(int flag)
+{
+	mtk_pm_tool = flag;
+}
+
+int MTK_get_mtk_pm(void)
+{
+	return mtk_pm_tool;
+}
+
+int MTK_kbase_vinstr_hwcnt_reader_setup(
+	struct kbase_vinstr_context *vctx,
+	struct kbase_ioctl_hwcnt_reader_setup *setup)
+{
+	int errcode;
+	struct kbase_vinstr_client *vcli = NULL;
+
+	if (!vctx || !setup ||
+	    (setup->buffer_count == 0) ||
+	    (setup->buffer_count > MAX_BUFFER_COUNT))
+		return -EINVAL;
+
+	errcode = kbasep_vinstr_client_create(vctx, setup, &vcli);
+	if (errcode)
+		goto error;
+
+	mutex_lock(&vctx->lock);
+	vctx->client_count++;
+	list_add(&vcli->node, &vctx->clients);
+	mtk_cli = vcli;
+	ds5_used = 0;
+	mutex_unlock(&vctx->lock);
+	return errcode;
+error:
+	kbasep_vinstr_client_destroy(vcli);
+	return errcode;
+}
+
+void MTK_kbasep_vinstr_hwcnt_set_interval(unsigned int interval)
+{
+	if (mtk_cli != NULL)
+		kbasep_vinstr_hwcnt_reader_ioctl_set_interval(mtk_cli, interval);
+}
+
+void MTK_kbasep_vinstr_hwcnt_release(void)
+{
+	mtk_pm_tool = pm_non;
+	ds5_used = 1;
+	if (mtk_cli != NULL) {
+		mutex_lock(&mtk_cli->vctx->lock);
+		mtk_cli->vctx->suspend_count = 0;
+		mtk_cli->vctx->client_count--;
+		list_del(&mtk_cli->node);
+		mutex_unlock(&mtk_cli->vctx->lock);
+		kbasep_vinstr_client_destroy(mtk_cli);
+		mtk_cli = NULL;
+	}
+}
+
+#if IS_ENABLED(CONFIG_MTK_SWPM)
+void MTK_reset_urate(void) {}
+void MTK_update_gpu_swpm(void) {}
+#endif

@@ -151,6 +151,11 @@ int kbasep_pm_metrics_init(struct kbase_device *kbdev)
 	kbdev->pm.backend.metrics.values.busy_cl[1] = 0;
 	kbdev->pm.backend.metrics.values.busy_gl = 0;
 
+#if IS_ENABLED(CONFIG_MALI_MIDGARD_DVFS) && IS_ENABLED(CONFIG_MTK_GPU_COMMON_DVFS)
+	kbdev->pm.backend.metrics.values.busy_gl_plus[0] = 0;
+	kbdev->pm.backend.metrics.values.busy_gl_plus[1] = 0;
+	kbdev->pm.backend.metrics.values.busy_gl_plus[2] = 0;
+#endif
 #endif
 	spin_lock_init(&kbdev->pm.backend.metrics.lock);
 
@@ -334,6 +339,14 @@ static void kbase_pm_get_dvfs_utilisation_calc(struct kbase_device *kbdev,
 			kbdev->pm.backend.metrics.values.busy_gl += ns_time;
 		if (kbdev->pm.backend.metrics.active_gl_ctx[2])
 			kbdev->pm.backend.metrics.values.busy_gl += ns_time;
+#if IS_ENABLED(CONFIG_MTK_GPU_COMMON_DVFS)
+		if (kbdev->pm.backend.metrics.active_gl_ctx[0])
+			kbdev->pm.backend.metrics.values.busy_gl_plus[0] += ns_time;
+		if (kbdev->pm.backend.metrics.active_gl_ctx[1])
+			kbdev->pm.backend.metrics.values.busy_gl_plus[1] += ns_time;
+		if (kbdev->pm.backend.metrics.active_gl_ctx[2])
+			kbdev->pm.backend.metrics.values.busy_gl_plus[2] += ns_time;
+#endif
 	} else {
 		kbdev->pm.backend.metrics.values.time_idle +=
 			(u32)(ktime_to_ns(diff) >> KBASE_PM_TIME_SHIFT);
@@ -368,6 +381,11 @@ void kbase_pm_get_dvfs_metrics(struct kbase_device *kbdev,
 	diff->busy_cl[0] = cur->busy_cl[0] - last->busy_cl[0];
 	diff->busy_cl[1] = cur->busy_cl[1] - last->busy_cl[1];
 	diff->busy_gl = cur->busy_gl - last->busy_gl;
+#if IS_ENABLED(CONFIG_MTK_GPU_COMMON_DVFS)
+	diff->busy_gl_plus[0]= cur->busy_gl_plus[0]- last->busy_gl_plus[0];
+	diff->busy_gl_plus[1] = cur->busy_gl_plus[1]- last->busy_gl_plus[1];
+	diff->busy_gl_plus[2] = cur->busy_gl_plus[2]- last->busy_gl_plus[2];
+#endif
 #endif
 
 	*last = *cur;
@@ -380,6 +398,11 @@ KBASE_EXPORT_TEST_API(kbase_pm_get_dvfs_metrics);
 #ifdef CONFIG_MALI_MIDGARD_DVFS
 void kbase_pm_get_dvfs_action(struct kbase_device *kbdev)
 {
+/*
+ * kbase_platform_dvfs_event is not implemented by MTK.
+ * We used MTKCalGpuUtilization/MTKCalGpuUtilization_ex instead.
+ */
+#if 0
 	int utilisation;
 	struct kbasep_pm_metrics *diff;
 #if !MALI_USE_CSF
@@ -416,8 +439,18 @@ void kbase_pm_get_dvfs_action(struct kbase_device *kbdev)
 	 */
 	kbase_platform_dvfs_event(kbdev, utilisation);
 #endif
+#endif
 }
 
+#if IS_ENABLED(CONFIG_MTK_GPU_COMMON_DVFS)
+bool kbase_pm_metrics_is_active(struct kbase_device *kbdev)
+{
+	return false;
+}
+KBASE_EXPORT_TEST_API(kbase_pm_metrics_is_active);
+void kbase_pm_metrics_start(struct kbase_device *kbdev) {}
+void kbase_pm_metrics_stop(struct kbase_device *kbdev) {}
+#else
 bool kbase_pm_metrics_is_active(struct kbase_device *kbdev)
 {
 	KBASE_DEBUG_ASSERT(kbdev != NULL);
@@ -448,7 +481,7 @@ void kbase_pm_metrics_stop(struct kbase_device *kbdev)
 	/* Timer is Stopped if its currently on (transition a) */
 	atomic_cmpxchg(&kbdev->pm.backend.metrics.timer_state, TIMER_ON, TIMER_STOPPED);
 }
-
+#endif
 
 #endif /* CONFIG_MALI_MIDGARD_DVFS */
 

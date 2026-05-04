@@ -137,12 +137,8 @@ static int apply_select_config(struct kbase_device *kbdev, u64 *select)
 
 	ret = wait_status(kbdev, STATUS_COMMAND_ACTIVE);
 
-	if (!ret) {
+	if (!ret)
 		kbase_reg_write(kbdev, IPA_CONTROL_REG(COMMAND), COMMAND_APPLY);
-		ret = wait_status(kbdev, STATUS_COMMAND_ACTIVE);
-	} else {
-		dev_err(kbdev->dev, "Wait for the pending command failed");
-	}
 
 	return ret;
 }
@@ -208,17 +204,6 @@ static void build_select_config(struct kbase_ipa_control *ipa_ctrl,
 				 << (IPA_CONTROL_SELECT_BITS_PER_CNT * j));
 		}
 	}
-}
-
-static int update_select_registers(struct kbase_device *kbdev)
-{
-	u64 select_config[KBASE_IPA_CORE_TYPE_NUM];
-
-	lockdep_assert_held(&kbdev->csf.ipa_control.lock);
-
-	build_select_config(&kbdev->csf.ipa_control, select_config);
-
-	return apply_select_config(kbdev, select_config);
 }
 
 static inline void calc_prfcnt_delta(struct kbase_device *kbdev,
@@ -665,22 +650,56 @@ int kbase_ipa_control_register(
 	 * before applying the new configuration.
 	 */
 	if (new_config) {
-		ret = update_select_registers(kbdev);
+		u64 select_config[KBASE_IPA_CORE_TYPE_NUM];
+
+		build_select_config(ipa_ctrl, select_config);
+		ret = apply_select_config(kbdev, select_config);
 		if (ret)
 			dev_err(kbdev->dev,
-				"%s: failed to apply new SELECT configuration",
+				"%s: failed to apply SELECT configuration",
 				__func__);
 	}
 
 	if (!ret) {
-		session->num_prfcnts = num_counters;
-		ret = session_gpu_start(kbdev, ipa_ctrl, session);
+		/* Accumulator registers don't contain any sample if the timer
+		 * has not been enabled first. Take a sample manually before
+		 * enabling the timer.
+		 */
+		if (ipa_ctrl->num_active_sessions == 0) {
+			kbase_reg_write(kbdev, IPA_CONTROL_REG(COMMAND),
+					COMMAND_SAMPLE);
+			ret = wait_status(kbdev, STATUS_COMMAND_ACTIVE);
+			if (!ret) {
+				kbase_reg_write(
+					kbdev, IPA_CONTROL_REG(TIMER),
+					timer_value(ipa_ctrl->cur_gpu_rate));
+			} else {
+				dev_err(kbdev->dev,
+					"%s: failed to sample new counters",
+					__func__);
+			}
+		}
 	}
 
 	if (!ret) {
+		session->num_prfcnts = num_counters;
 		session->active = true;
 		ipa_ctrl->num_active_sessions++;
 		*client = session;
+
+		/*
+		 * Read current raw value to initialize the session.
+		 * This is necessary to put the first query in condition
+		 * to generate a correct value by calculating the difference
+		 * from the beginning of the session.
+		 */
+		for (i = 0; i < session->num_prfcnts; i++) {
+			struct kbase_ipa_control_prfcnt *prfcnt =
+				&session->prfcnts[i];
+			u64 raw_value = read_value_cnt(kbdev, (u8)prfcnt->type,
+						       prfcnt->select_idx);
+			prfcnt->latest_raw_value = raw_value;
+		}
 	}
 
 exit:
@@ -757,7 +776,10 @@ int kbase_ipa_control_unregister(struct kbase_device *kbdev, const void *client)
 	}
 
 	if (new_config) {
-		ret = update_select_registers(kbdev);
+		u64 select_config[KBASE_IPA_CORE_TYPE_NUM];
+
+		build_select_config(ipa_ctrl, select_config);
+		ret = apply_select_config(kbdev, select_config);
 		if (ret)
 			dev_err(kbdev->dev,
 				"%s: failed to apply SELECT configuration",
@@ -911,16 +933,18 @@ void kbase_ipa_control_handle_gpu_power_on(struct kbase_device *kbdev)
 	/* Interrupts are already disabled and interrupt state is also saved */
 	spin_lock(&ipa_ctrl->lock);
 
-	ret = update_select_registers(kbdev);
+	/* Re-issue the APPLY command, this is actually needed only for CSHW */
+	kbase_reg_write(kbdev, IPA_CONTROL_REG(COMMAND), COMMAND_APPLY);
+	ret = wait_status(kbdev, STATUS_COMMAND_ACTIVE);
 	if (ret) {
 		dev_err(kbdev->dev,
-			"Failed to reconfigure the select registers: %d", ret);
+			"Wait for the completion of apply command failed: %d",
+			ret);
 	}
 
-	/* Accumulator registers would not contain any sample after GPU power
-	 * cycle if the timer has not been enabled first. Initialize all sessions.
-	 */
-	ret = session_gpu_start(kbdev, ipa_ctrl, NULL);
+	/* Re-enable the timer for periodic sampling */
+	kbase_reg_write(kbdev, IPA_CONTROL_REG(TIMER),
+			timer_value(ipa_ctrl->cur_gpu_rate));
 
 	spin_unlock(&ipa_ctrl->lock);
 }

@@ -315,6 +315,10 @@ void kbase_instr_hwcnt_sample_done(struct kbase_device *kbdev)
 	 * and don't need to do any action when sample is done.
 	 */
 
+	/* If the state is in unrecoverable error, we already wake_up the waiter
+	 * and don't need to do any action when sample is done.
+	 */
+
 	if (kbdev->hwcnt.backend.state == KBASE_INSTR_STATE_FAULT) {
 		kbdev->hwcnt.backend.triggered = 1;
 		wake_up(&kbdev->hwcnt.backend.wait);
@@ -343,6 +347,8 @@ int kbase_instr_hwcnt_wait_for_dump(struct kbase_context *kctx)
 	if (kbdev->hwcnt.backend.state == KBASE_INSTR_STATE_FAULT) {
 		err = -EINVAL;
 		kbdev->hwcnt.backend.state = KBASE_INSTR_STATE_IDLE;
+	} else if (kbdev->hwcnt.backend.state == KBASE_INSTR_STATE_UNRECOVERABLE_ERROR) {
+		err = -EIO;
 	} else if (kbdev->hwcnt.backend.state == KBASE_INSTR_STATE_UNRECOVERABLE_ERROR) {
 		err = -EIO;
 	} else {

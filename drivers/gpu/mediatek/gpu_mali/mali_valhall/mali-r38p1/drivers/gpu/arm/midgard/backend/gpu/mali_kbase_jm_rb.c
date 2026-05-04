@@ -754,11 +754,15 @@ static int kbase_jm_exit_protected_mode(struct kbase_device *kbdev,
 		WARN_ON(kbdev->protected_mode_transition);
 		WARN_ON(kbase_gpu_atoms_submitted_any(kbdev));
 
-		/*
+		/* L2 cache has been turned off (which is needed prior to the reset of GPU
+		 * to exit the protected mode), so the override flag can be safely cleared.
+		 * Even if L2 cache is powered up again before the actual reset, it should
+		 * not be an issue (there are no jobs running on the GPU).
 		 * Exiting protected mode requires a reset, but first the L2
 		 * needs to be powered down to ensure it's not active when the
 		 * reset is issued.
 		 */
+		kbase_pm_protected_override_disable(kbdev);
 		katom[idx]->protected_state.exit =
 				KBASE_ATOM_EXIT_PROTECTED_IDLE_L2;
 
@@ -1154,6 +1158,14 @@ bool kbase_gpu_irq_evict(struct kbase_device *kbdev, int js,
 		kbdev->hwaccess.backend.slot_rb[js].last_kctx_tagged =
 			SLOT_RB_TAG_KCTX(katom->kctx);
 
+		/* On evicting the next_katom, the last submission kctx on the
+		 * given job slot then reverts back to the one that owns katom.
+		 * The aim is to enable the next submission that can determine
+		 * if the read only shader core L1 cache should be invalidated.
+		 */
+		kbdev->hwaccess.backend.slot_rb[js].last_kctx_tagged =
+			SLOT_RB_TAG_KCTX(katom->kctx);
+
 		return true;
 	}
 
@@ -1355,6 +1367,9 @@ void kbase_gpu_complete_hw(struct kbase_device *kbdev, int js,
 									   sizeof(js_string)),
 					       ktime_to_ns(ktime_get_raw()), 0, 0, 0);
 		}
+
+		/* Clear the slot's last katom submission kctx on reset */
+		kbdev->hwaccess.backend.slot_rb[js].last_kctx_tagged = SLOT_RB_NULL_TAG_VAL;
 	}
 #endif
 
@@ -1598,6 +1613,10 @@ bool kbase_backend_soft_hard_stop_slot(struct kbase_device *kbdev,
 		else
 			katom_idx1_valid = false;
 	} else {
+					/* Revert the last_context, or mark as purged */
+					kbdev->hwaccess.backend.slot_rb[js].last_kctx_tagged =
+					katom_idx0->kctx ? SLOT_RB_TAG_KCTX(katom_idx0->kctx) :
+					SLOT_RB_TAG_PURGED;
 		katom_idx0_valid = (katom_idx0 && (!kctx || kctx_idx0 == kctx));
 		katom_idx1_valid = (katom_idx1 && (!kctx || kctx_idx1 == kctx));
 	}

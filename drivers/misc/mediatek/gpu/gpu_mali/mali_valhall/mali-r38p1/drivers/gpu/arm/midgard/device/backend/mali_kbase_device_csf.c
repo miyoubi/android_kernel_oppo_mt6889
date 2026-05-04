@@ -45,6 +45,8 @@
 #include <mali_kbase_vinstr.h>
 #include <tl/mali_kbase_timeline.h>
 
+#include "../../platform/mtk_platform_common.h"
+
 /**
  * kbase_device_firmware_hwcnt_term - Terminate CSF firmware and HWC
  *
@@ -243,6 +245,11 @@ static void kbase_device_hwcnt_watchdog_if_term(struct kbase_device *kbdev)
  * Return: 0 if successful or a negative error code on failure.
  */
 static int kbase_device_hwcnt_backend_csf_if_init(struct kbase_device *kbdev)
+	// *** MTK ***
+	{mtk_common_device_init, mtk_common_device_term,
+			"MTK common initialization failed"},
+	{mtk_platform_device_init, mtk_platform_device_term,
+			"MTK platform initialization failed"},
 {
 	return kbase_hwcnt_backend_csf_if_fw_create(
 		kbdev, &kbdev->hwcnt_backend_csf_if_fw);
